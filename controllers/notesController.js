@@ -5,7 +5,7 @@ const asyncHandler = require('express-async-handler')
 const getAllNotes = asyncHandler(async (req, res) => {
     const notes = await Note.find().lean()
     if (!notes?.length) {
-        return res.status(400).json({ message: 'No notes found' })
+        return res.status(400).json({ message: 'Khong tim thay note' })
     }
     const notesWithUser = await Promise.all(notes.map(async (note) => {
         const user = await User.findById(note.user).lean().exec()
@@ -17,19 +17,20 @@ const getAllNotes = asyncHandler(async (req, res) => {
 const createNewNote = asyncHandler(async (req, res) => {
     const { user, title, text } = req.body
     if (!user || !title || !text) {
-        return res.status(400).json({ message: 'All fields are required' })
+        return res.status(400).json({ message: 'Vui long nhap day du thong tin' })
     }
-    const duplicate = await Note.findOne({ title }).lean().exec()
+    const duplicate = await Note.findOne({ title }).collation({ locale: 'en', strength: 2 }).lean().exec()
+
 
     if (duplicate) {
-        return res.status(409).json({ message: 'Duplicate note title' })
+        return res.status(409).json({ message: 'Tieu de trung lap' })
     }
     const note = await Note.create({ user, title, text })
 
     if (note) { 
-        return res.status(201).json({ message: 'New note created' })
+        return res.status(201).json({ message: 'Da tao note moi' })
     } else {
-        return res.status(400).json({ message: 'Invalid note data received' })
+        return res.status(400).json({ message: 'That bai' })
     }
 
 })
@@ -46,7 +47,8 @@ const updateNote = asyncHandler(async (req, res) => {
     if (!note) {
         return res.status(400).json({ message: 'Khong tim thay' })
     }
-    const duplicate = await Note.findOne({ title }).lean().exec()
+    const duplicate = await Note.findOne({ title }).collation({ locale: 'en', strength: 2 }).lean().exec()
+
 
     if (duplicate && duplicate?._id.toString() !== id) {
         return res.status(409).json({ message: 'Tieu de da duoc su dung' })

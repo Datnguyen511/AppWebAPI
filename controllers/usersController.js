@@ -17,12 +17,15 @@ const {username, password, roles } = req.body
 if (!username || !password || !Array.isArray(roles) || !roles.length){
     return res.status(400).json({message:'Vui long dien het thong tin'})
 }
-const duplicate = await User.findOne({username}).lean().exec()
+const duplicate = await User.findOne({username}).collation({ locale: 'en', strength: 2 }).lean().exec()
+
 if (duplicate){
     return res.status(409).json({message: 'Ten dang nhap da duoc su dung'})
 }
 const hashedpassword = await bcrypt.hash(password, 10)
-const userObject = { username, "password": hashedpassword, roles}
+const userObject = (!Array.isArray(roles) || !roles.length)
+        ? { username, "password": hashedPwd }
+        : { username, "password": hashedPwd, roles }
 const user = await User.create(userObject)
 if (user){
     res.status(201).json({message: `Da tao user ${username}`})
@@ -41,7 +44,8 @@ const user = await User.findById(id).exec()
 if (!user){
     return res.status(400).json({ message: 'That bai'})
 }
-const duplicate = await User.findOne({ username}).lean().exec()
+const duplicate = await User.findOne({ username}).collation({ locale: 'en', strength: 2 }).lean().exec()
+
 if (duplicate && duplicate?._id.toString() !== id){
     return res.status(409).json({message: 'Ten dang nhap da duoc su dung'})
 }
