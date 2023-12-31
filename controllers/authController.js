@@ -11,6 +11,7 @@ const login = asyncHandler(async (req, res) => {
     }
 
     const foundUser = await User.findOne({ username }).exec()
+    
     //user khong active thi khong truy cap dc
     if (!foundUser || !foundUser.active) {
         return res.status(401).json({ message: 'Khong co quyen truy cap' })

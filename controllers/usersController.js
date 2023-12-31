@@ -36,7 +36,7 @@ else {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-const {id, username, roles, active, password} = req.body
+const {id, username, roles, active, password, phonenum} = req.body
 if (!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean'){
     return res.status(400).json({message: 'Vui long nhap day du thong tin'})
 }
@@ -53,6 +53,7 @@ if (duplicate && duplicate?._id.toString() !== id){
 user.username = username
 user.roles = roles
 user.active = active
+user.phonenum = phonenum
 if (password){
     user.password = await bcrypt.hash(password, 10)
 }
